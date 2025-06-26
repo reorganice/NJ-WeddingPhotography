@@ -106,9 +106,16 @@ ADMIN_PASSWORD=secure_admin_password
 
 ## Session Management
 - Always update PROJECT_LOG.md with session progress
+- **COMMIT CHECK**: Before major changes, always check if current work should be committed
 - Commit frequently with descriptive messages
 - Use Todo tracking for complex multi-step tasks
 - Document decisions and architectural choices
+
+## Development Rules (ALWAYS FOLLOW)
+1. **Before adding dependencies**: Check if current changes should be committed first
+2. **Before major features**: Commit current progress as a checkpoint
+3. **After configuration changes**: Always commit configuration updates
+4. **Before switching contexts**: Commit current work to avoid mixing concerns
 
 ## MCP Server Integration
 - **Docker MCP Toolkit**: Container management and deployment

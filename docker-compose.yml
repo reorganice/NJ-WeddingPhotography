@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: directus
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: directus_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "directus", "-d", "directus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  directus:
+    image: directus/directus:latest
+    ports:
+      - "8055:8055"
+    volumes:
+      - directus_uploads:/directus/uploads
+      - directus_database:/directus/database
+    environment:
+      # Database
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: directus
+      DB_USERNAME: directus
+      DB_PASSWORD: directus_password
+      
+      # Security
+      KEY: 255d861b-5ea1-5996-9aa3-922530ec40b1
+      SECRET: 6116487b-cda1-52c2-b5b5-c8022c45e263
+      
+      # Admin User
+      ADMIN_EMAIL: admin@njwedding.com
+      ADMIN_PASSWORD: wedding_admin_2024
+      
+      # General
+      PUBLIC_URL: http://localhost:8055
+      WEBSOCKETS_ENABLED: true
+      
+      # CORS for frontend development
+      CORS_ENABLED: true
+      CORS_ORIGIN: "http://localhost:5173,http://localhost:4173"
+      
+      # File Storage
+      STORAGE_LOCATIONS: local
+      STORAGE_LOCAL_DRIVER: local
+      STORAGE_LOCAL_ROOT: ./uploads
+      
+      # Email (disabled for local development)
+      EMAIL_FROM: no-reply@njwedding.com
+      EMAIL_TRANSPORT: sendmail
+      EMAIL_SENDMAIL_NEW_LINE: unix
+      EMAIL_SENDMAIL_PATH: /usr/sbin/sendmail
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Redis for caching (optional but recommended)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  directus_uploads:
+  directus_database:
+  redis_data:
+
+networks:
+  default:
+    name: wedding_network
